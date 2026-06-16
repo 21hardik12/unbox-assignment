@@ -1,0 +1,14 @@
+# Keep build contexts small and reproducible.
+**/node_modules
+**/dist
+**/build
+**/coverage
+**/.env
+**/.env.local
+**/*.log
+**/.git
+**/.gitignore
+.git
+docs
+*.md
+!**/README.md

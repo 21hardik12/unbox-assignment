@@ -1,0 +1,259 @@
+/* ============================================================================
+   Real-Time Speedometer — dashboard styling.
+   A compact, modern dark theme. Layout uses CSS grid and collapses to a single
+   column on narrow screens.
+   ========================================================================== */
+
+:root {
+  --bg: #0b1120;
+  --bg-panel: #0f172a;
+  --border: #1e293b;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --accent: #38bdf8;
+  --green: #22c55e;
+  --red: #ef4444;
+  --amber: #f59e0b;
+
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(
+      1200px 600px at 80% -10%,
+      rgba(56, 189, 248, 0.08),
+      transparent
+    ),
+    var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px clamp(16px, 4vw, 40px) 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Header --------------------------------------------------------------- */
+.app__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.app__title {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.app__subtitle {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.app__subtitle code {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 6px;
+  color: var(--accent);
+  font-size: 0.85em;
+}
+
+/* --- Connection badge ----------------------------------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+
+.badge--connected {
+  color: var(--green);
+  border-color: rgba(34, 197, 94, 0.35);
+}
+.badge--connected .badge__dot {
+  background: var(--green);
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  animation: pulse 1.6s infinite;
+}
+
+.badge--connecting {
+  color: var(--amber);
+}
+.badge--connecting .badge__dot {
+  background: var(--amber);
+}
+
+.badge--disconnected {
+  color: var(--red);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+.badge--disconnected .badge__dot {
+  background: var(--red);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+/* --- Grid layout ---------------------------------------------------------- */
+.app__grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 18px;
+  flex: 1;
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+}
+
+.panel--gauge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel--chart {
+  grid-column: 1 / -1;
+}
+
+.panel__heading {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.panel__hint {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.speedometer {
+  width: 100%;
+  max-width: 400px;
+  /* Height is set inline (a ratio of width); overflow hides the empty lower
+     half of the gauge's square SVG so the panel stays compact. */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+/* --- Stats ---------------------------------------------------------------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.stat {
+  background: rgba(148, 163, 184, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat--accent {
+  grid-column: 1 / -1;
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.stat__label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.stat__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat--accent .stat__value {
+  font-size: 2.1rem;
+  color: var(--accent);
+}
+
+.stat__unit {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+/* --- Footer --------------------------------------------------------------- */
+.app__footer {
+  margin-top: 24px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+/* --- Responsive ----------------------------------------------------------- */
+@media (max-width: 760px) {
+  .app__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,116 @@
+# =============================================================================
+# Full speedometer pipeline, one command: `docker compose up --build`.
+#
+#   simulator ─MQTT▶ mqtt ─MQTT▶ backend ─SQL▶ timescaledb
+#                                   └────────WebSocket────▶ frontend (browser)
+#
+# Healthchecks + depends_on conditions guarantee correct startup ordering:
+#   timescaledb + mqtt  →  backend  →  simulator / frontend
+# Defaults are inlined (${VAR:-default}) so it boots with no .env file.
+# =============================================================================
+
+name: speedometer
+
+services:
+  # --- Time-series database --------------------------------------------------
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-speedometer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-speedometer_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-speedometer}
+    ports:
+      - '${TIMESCALE_PORT:-5432}:5432'
+    volumes:
+      - timescale-data:/var/lib/postgresql/data
+      # Runs once on first init to create the extension + hypertable.
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-speedometer} -d ${POSTGRES_DB:-speedometer}']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  # --- MQTT broker -----------------------------------------------------------
+  mqtt:
+    image: eclipse-mosquitto:2
+    ports:
+      - '${MQTT_PORT:-1883}:1883'
+      - '${MQTT_WS_PORT:-9001}:9001'
+    volumes:
+      - ./infra/mosquitto/config:/mosquitto/config:ro
+      - mosquitto-data:/mosquitto/data
+    healthcheck:
+      # Succeeds only if the broker accepts a connection and a publish.
+      test: ['CMD-SHELL', 'mosquitto_pub -h localhost -p 1883 -t healthcheck -m ping || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  # --- Backend: ingest + REST API + Socket.IO --------------------------------
+  backend:
+    build:
+      context: ./backend
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3001
+      DATABASE_URL: postgres://${POSTGRES_USER:-speedometer}:${POSTGRES_PASSWORD:-speedometer_dev_pw}@timescaledb:5432/${POSTGRES_DB:-speedometer}
+      MQTT_URL: mqtt://mqtt:1883
+      MQTT_TOPIC: sensors/+/speed
+      DEFAULT_DEVICE_ID: ${SIM_DEVICE_ID:-vehicle-01}
+      # The browser reaches the API through nginx (same origin), so CORS only
+      # needs the frontend's published origin.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # --- Sensor simulator ------------------------------------------------------
+  simulator:
+    build:
+      context: ./simulator
+    environment:
+      NODE_ENV: production
+      MQTT_URL: mqtt://mqtt:1883
+      DEVICE_ID: ${SIM_DEVICE_ID:-vehicle-01}
+      INTERVAL_MS: ${SIM_INTERVAL_MS:-1000}
+      MAX_SPEED: ${SIM_MAX_SPEED:-220}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      mqtt:
+        condition: service_healthy
+      # Wait until the backend is subscribed so early samples aren't lost.
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # --- Frontend (nginx: static SPA + reverse proxy) --------------------------
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - '${FRONTEND_PORT:-8080}:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1:80/ || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  timescale-data:
+  mosquitto-data:
