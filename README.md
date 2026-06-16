@@ -9,6 +9,10 @@ sample lands in the database.
 > Stack: **Node.js + TypeScript · MQTT (Mosquitto) · PostgreSQL/TimescaleDB · React + Vite, docker**.
 
 ---
+## Frontend ScreenShot
+
+![alt text](image.png)
+
 
 ## Architecture
 
