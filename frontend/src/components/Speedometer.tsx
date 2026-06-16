@@ -58,10 +58,10 @@ export function Speedometer({ value }: { value: number }) {
         segments={11}
         maxSegmentLabels={6}
         ringWidth={width < 340 ? 18 : 26}
-        needleColor="#e2e8f0"
+        needleColor="#334155"
         startColor="#22c55e"
         endColor="#ef4444"
-        textColor="#94a3b8"
+        textColor="#475569"
         needleTransitionDuration={900}
         currentValueText="${value} km/h"
         valueFormat="d"

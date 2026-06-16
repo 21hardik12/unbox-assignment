@@ -27,7 +27,7 @@ export function SpeedChart({ data }: SpeedChartProps) {
         data={chartData}
         margin={{ top: 8, right: 16, bottom: 4, left: -12 }}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
         <XAxis
           dataKey="time"
           tick={{ fill: '#64748b', fontSize: 11 }}
@@ -40,18 +40,18 @@ export function SpeedChart({ data }: SpeedChartProps) {
         />
         <Tooltip
           contentStyle={{
-            background: '#0f172a',
-            border: '1px solid #1e293b',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
             borderRadius: 8,
-            color: '#e2e8f0',
+            color: '#0f172a',
           }}
-          labelStyle={{ color: '#94a3b8' }}
+          labelStyle={{ color: '#475569' }}
           formatter={(value) => [`${value} km/h`, 'Speed']}
         />
         <Line
           type="monotone"
           dataKey="speed"
-          stroke="#38bdf8"
+          stroke="#0284c7"
           strokeWidth={2}
           dot={false}
           isAnimationActive={false}
