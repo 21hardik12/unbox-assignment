@@ -147,7 +147,6 @@ unbox-assignment/
 │   └── src/
 │       ├── hooks/useSpeedStream.ts   # Socket.IO + history seeding
 │       └── components/        # Speedometer, SpeedChart, StatsPanel, badge
-└── docs/                      # ARCHITECTURE.md + ASSIGNMENT.md
 ```
 
 ---
