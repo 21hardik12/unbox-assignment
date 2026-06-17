@@ -55,7 +55,7 @@ client.on('close', () => logger.warn('MQTT connection closed'));
 function shutdown(signal: string): void {
   logger.info({ signal }, 'Shutting down simulator...');
   if (timer) clearInterval(timer);
-  client.end(false, () => process.exit(0));
+  client.end(false, () => process.exit(0)); // false: 'don't send the disconnect packet'
   // Safety net if the broker never acknowledges the disconnect.
   setTimeout(() => process.exit(0), 3000).unref();
 }
